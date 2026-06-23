@@ -15,15 +15,13 @@
 
   <header class="app-navbar">
     <div class="navbar-left">
-      <div class="hamburger" onclick="toggleSidebar()">
-        <span></span><span></span><span></span>
-      </div>
+      <div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
       <span class="navbar-title">Live Sessions</span>
     </div>
     <div class="navbar-right">
       <div class="navbar-icon-btn">🔔<div class="notif-dot"></div></div>
       <div class="navbar-user">
-        <div class="navbar-avatar" id="nav-avatar">S</div>
+        <div class="navbar-avatar" id="nav-avatar" style="background:var(--super-admin)">S</div>
         <span id="nav-name">Super Admin</span>
       </div>
     </div>
@@ -39,6 +37,16 @@
         <div>
           <div class="page-title">Live Sessions</div>
           <div class="page-subtitle">Schedule sessions for instructors and admins only</div>
+        </div>
+      </div>
+
+      <!-- Institute Selector -->
+      <div class="panel" style="margin-bottom:24px">
+        <div class="panel-body" style="display:flex;align-items:center;gap:16px">
+          <label class="form-label" style="margin:0;white-space:nowrap">Select Institute</label>
+          <select class="form-select" id="institute-select" style="max-width:300px" onchange="onInstituteChange()">
+            <option value="">Loading institutes...</option>
+          </select>
         </div>
       </div>
 
@@ -100,7 +108,7 @@
             <div class="form-group" style="grid-column:1/-1">
               <label class="form-label">Invite Staff <span style="color:var(--error)">*</span></label>
               <div id="staff-list" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;border:1.5px solid var(--border);border-radius:8px;min-height:56px;background:var(--bg)">
-                <span style="color:var(--text-muted);font-size:13px">Loading staff...</span>
+                <span style="color:var(--text-muted);font-size:13px">Select an institute above to load staff</span>
               </div>
               <span style="font-size:12px;color:var(--text-muted);margin-top:4px;display:block">Select instructors and/or admins to invite</span>
             </div>
@@ -135,7 +143,7 @@
               </tr>
             </thead>
             <tbody id="sessions-table">
-              <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Loading...</td></tr>
+              <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Select an institute above to view sessions</td></tr>
             </tbody>
           </table>
         </div>
@@ -151,6 +159,6 @@
 <script src="../js/utils.js"></script>
 <script src="../js/toast.js"></script>
 <script src="../js/sidebar.js"></script>
-<script src="../js/super-admin/live sessions.js"></script>
+<script src="../js/super-admin/live-sessions.js"></script>
 </body>
 </html>

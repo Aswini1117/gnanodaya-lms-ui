@@ -8,6 +8,7 @@ const NAV = {
       { icon: '🗂', label: 'Audit Logs',         href: '/super-admin/audit-logs.html' },
       { icon: '🔐', label: 'Roles & Permissions', href: '/super-admin/roles-permissions.html' },
       { icon: '🔌', label: 'Integrations',       href: '/super-admin/integrations.html' },
+      { icon: '👤', label: 'Admins',             href: '/super-admin/admins.html' },
       { icon: '🎥', label: 'Live Sessions',      href: '/super-admin/live-sessions.html' },
     ]}
   ],
@@ -35,7 +36,6 @@ const NAV = {
   INSTRUCTOR: [
     { section: 'Teaching', items: [
       { icon: '🏠', label: 'Dashboard',          href: '/instructor/dashboard.html' },
-      { icon: '🗂', label: 'My Batches', href: '/instructor/batches.html' },
       { icon: '📚', label: 'My Courses',         href: '/instructor/my-courses.html' },
       { icon: '➕', label: 'Create Course',      href: '/instructor/course-builder.html' },
       { icon: '👥', label: 'My Students',        href: '/instructor/my-students.html' },

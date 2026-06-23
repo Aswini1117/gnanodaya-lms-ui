@@ -1,5 +1,6 @@
-let allSessions = [];
-let staffList   = [];
+let allSessions   = [];
+let staffList     = [];
+let selectedInstitute = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   guardPage('SUPER_ADMIN');
@@ -8,20 +9,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('nav-name').textContent   = u.name || 'Super Admin';
     document.getElementById('nav-avatar').textContent = (u.name || 'S').charAt(0);
   }
-  await Promise.all([loadSessions(), loadStaff()]);
+  await loadInstitutes();
 });
+
+// ── LOAD INSTITUTES ────────────────────────────────────
+async function loadInstitutes() {
+  try {
+    const res      = await api.get('/super-admin/institutes');
+    const list     = res?.data || res || [];
+    const sel      = document.getElementById('institute-select');
+
+    if (!list.length) {
+      sel.innerHTML = '<option value="">No institutes found</option>';
+      return;
+    }
+
+    sel.innerHTML = '<option value="">Select institute</option>' +
+      list.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+  } catch (e) {
+    console.error('Failed to load institutes:', e);
+  }
+}
+
+// ── ON INSTITUTE CHANGE ────────────────────────────────
+async function onInstituteChange() {
+  const instituteId = document.getElementById('institute-select').value;
+  if (!instituteId) return;
+  selectedInstitute = parseInt(instituteId);
+  await Promise.all([loadSessions(), loadStaff()]);
+}
 
 // ── LOAD SESSIONS ─────────────────────────────────────
 async function loadSessions() {
   const tb = document.getElementById('sessions-table');
+  if (!selectedInstitute) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Select an institute above to view sessions</td></tr>';
+    return;
+  }
   try {
-    const u           = getUser();
-    const instituteId = u?.instituteId;
-    if (!instituteId) {
-      tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">No institute found</td></tr>';
-      return;
-    }
-    const res   = await api.get(`/zoom/meetings/institute/${instituteId}`);
+    const res   = await api.get(`/zoom/meetings/institute/${selectedInstitute}`);
     const all   = res?.data || res || [];
     allSessions = all.filter(s => s.targetType === 'STAFF');
     updateStats(allSessions);
@@ -31,23 +57,21 @@ async function loadSessions() {
   }
 }
 
-// ── LOAD STAFF (instructors + admins) ─────────────────
+// ── LOAD STAFF ─────────────────────────────────────────
 async function loadStaff() {
-  const u           = getUser();
-  const instituteId = u?.instituteId;
-  const container   = document.getElementById('staff-list');
-  if (!instituteId) return;
+  const container = document.getElementById('staff-list');
+  if (!selectedInstitute) return;
   try {
     const [instructorsRes, adminsRes] = await Promise.all([
-      api.get(`/admin/instructors/${instituteId}`),
-      api.get(`/super-admin/admins/${instituteId}`)
+      api.get(`/admin/instructors/${selectedInstitute}`),
+      api.get(`/super-admin/admins/${selectedInstitute}`)
     ]);
     const instructors = (instructorsRes?.data || instructorsRes || []).map(u => ({ ...u, roleLabel: 'Instructor' }));
     const admins      = (adminsRes?.data     || adminsRes     || []).map(u => ({ ...u, roleLabel: 'Admin' }));
     staffList         = [...instructors, ...admins];
 
     if (!staffList.length) {
-      container.innerHTML = '<span style="color:var(--text-muted);font-size:13px">No instructors or admins found</span>';
+      container.innerHTML = '<span style="color:var(--text-muted);font-size:13px">No instructors or admins found for this institute</span>';
       return;
     }
 
@@ -75,12 +99,11 @@ async function createSession() {
 
   hideCreateAlerts();
 
+  if (!selectedInstitute) { showCreateAlert('error', 'Please select an institute first.'); return; }
   if (!topic)              { showCreateAlert('error', 'Topic is required.'); return; }
   if (!dt)                 { showCreateAlert('error', 'Please select a date and time.'); return; }
   if (!duration)           { showCreateAlert('error', 'Please enter a duration.'); return; }
   if (!selectedIds.length) { showCreateAlert('error', 'Please select at least one staff member.'); return; }
-
-  const u = getUser();
 
   const body = {
     topic,
@@ -89,7 +112,7 @@ async function createSession() {
     duration:       parseInt(duration),
     targetType:     'STAFF',
     invitedUserIds: selectedIds,
-    instituteId:    u?.instituteId || null
+    instituteId:    selectedInstitute
   };
 
   setCreateLoading(true);

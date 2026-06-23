@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admins — LMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/variables.css"/>
+  <link rel="stylesheet" href="../css/globals.css"/>
+  <link rel="stylesheet" href="../css/shared.css"/>
+</head>
+<body>
+<div class="app-layout">
+
+  <header class="app-navbar">
+    <div class="navbar-left">
+      <div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
+      <span class="navbar-title">Admins</span>
+    </div>
+    <div class="navbar-right">
+      <div class="navbar-icon-btn">🔔<div class="notif-dot"></div></div>
+      <div class="navbar-user">
+        <div class="navbar-avatar" id="nav-avatar" style="background:var(--super-admin)">S</div>
+        <span id="nav-name">Super Admin</span>
+      </div>
+    </div>
+  </header>
+
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <main class="app-main">
+    <div class="main-content">
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">Admins</div>
+          <div class="page-subtitle">Create and manage admin accounts across institutes</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="openModal()">+ Create Admin</button>
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="panel" style="margin-bottom:20px">
+        <div class="panel-body" style="display:flex;gap:12px;flex-wrap:wrap">
+          <input type="text" class="form-input" id="search-input"
+            placeholder="🔍 Search admins..."
+            style="max-width:300px" oninput="filterAdmins()"/>
+          <select class="form-select" id="institute-filter" style="max-width:220px" onchange="filterAdmins()">
+            <option value="">All Institutes</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">All Admins</span>
+          <span class="badge badge-primary" id="admin-count">0</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Admin</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Institute</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admins-table">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Create Admin Modal -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Create Admin</div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">
+      Share phone + password directly with the admin after creating their account.
+    </p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Full Name <span style="color:var(--error)">*</span></label>
+        <input type="text" class="form-input" id="admin-name" placeholder="Full name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone <span style="color:var(--error)">*</span></label>
+        <input type="text" class="form-input" id="admin-phone" placeholder="10-digit phone number"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="admin-email" placeholder="Email address"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password <span style="color:var(--error)">*</span></label>
+        <input type="password" class="form-input" id="admin-password" placeholder="Set a password"/>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Institute <span style="color:var(--error)">*</span></label>
+        <select class="form-select" id="admin-institute">
+          <option value="">Select institute</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveAdmin()">
+        <span id="save-text">Create Admin</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/role-guard.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/sidebar.js"></script>
+<script src="../js/super-admin/admins.js"></script>
+</body>
+</html>
