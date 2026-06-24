@@ -46,5 +46,5 @@ async function loadCerts() {
 }
 
 function downloadCert(id) {
-  window.open(`http://localhost:8080/api/student/certificates/${id}/download`, '_blank');
+  window.open(`http://https://gnanodaya-lms-backend-production.up.railway.app/api/student/certificates/${id}/download`, '_blank');
 }

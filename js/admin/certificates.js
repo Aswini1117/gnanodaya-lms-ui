@@ -82,7 +82,7 @@ async function issueCertificate() {
 async function downloadCert(id) {
   try {
     showToast('Downloading...', 'info');
-    window.open(`http://localhost:8080/api/admin/certificates/${id}/download`, '_blank');
+    window.open(`http://https://gnanodaya-lms-backend-production.up.railway.app/api/admin/certificates/${id}/download`, '_blank');
   } catch (e) { showToast('Download failed', 'error'); }
 }
 
