@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('nav-name').textContent   = u.name || 'Admin';
     document.getElementById('nav-avatar').textContent = (u.name || 'A').charAt(0);
   }
-  await Promise.all([loadSessions(), loadBatches()]);
+  await Promise.all([loadSessions(), loadBatches(), loadInstructors()]);
 });
 
 // ── LOAD SESSIONS ─────────────────────────────────────
@@ -15,13 +15,9 @@ async function loadSessions() {
   const tb = document.getElementById('sessions-table');
   try {
     const u           = getUser();
-    const instituteId = u?.instituteId;
-    if (!instituteId) {
-      tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">No institute found for this account</td></tr>';
-      return;
-    }
-    const res   = await api.get(`/zoom/meetings/institute/${instituteId}`);
-    allSessions = res?.data || res || [];
+    const instituteId = u?.instituteId || 1;
+    const res         = await api.get(`/zoom/meetings/institute/${instituteId}`);
+    allSessions       = res?.data || res || [];
     populateFilters(allSessions);
     updateStats(allSessions);
     renderTable(allSessions);
@@ -33,8 +29,7 @@ async function loadSessions() {
 // ── LOAD BATCHES ───────────────────────────────────────
 async function loadBatches() {
   const u           = getUser();
-  const instituteId = u?.instituteId;
-  if (!instituteId) return;
+  const instituteId = u?.instituteId || 1;
   try {
     const res  = await api.get(`/admin/batches/${instituteId}`);
     const list = res?.data || res || [];
@@ -46,11 +41,37 @@ async function loadBatches() {
   }
 }
 
+// ── LOAD INSTRUCTORS ───────────────────────────────────
+async function loadInstructors() {
+  const u           = getUser();
+  const instituteId = u?.instituteId || 1;
+  const container   = document.getElementById('instructor-list');
+  if (!container) return;
+  try {
+    const res  = await api.get(`/admin/instructors/${instituteId}`);
+    const list = res?.data || res || [];
+    if (!list.length) {
+      container.innerHTML = '<span style="color:var(--text-muted);font-size:13px">No instructors found</span>';
+      return;
+    }
+    container.innerHTML = list.map(i => `
+      <label style="display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;background:var(--surface)">
+        <input type="checkbox" value="${i.id}" name="instructor-pick" style="accent-color:var(--primary)"/>
+        <span>${i.fullName}</span>
+      </label>
+    `).join('');
+  } catch (e) {
+    if (container) container.innerHTML = '<span style="color:var(--text-muted);font-size:13px">Failed to load</span>';
+  }
+}
+
 // ── AUDIENCE CHANGE ────────────────────────────────────
 function onTargetChange() {
-  const target     = document.getElementById('session-target').value;
-  const batchGroup = document.getElementById('batch-group');
-  batchGroup.style.display = (target === 'STUDENTS' || target === 'BOTH') ? 'block' : 'none';
+  const target          = document.getElementById('session-target').value;
+  const batchGroup      = document.getElementById('batch-group');
+  const instructorGroup = document.getElementById('instructor-group');
+  batchGroup.style.display      = (target === 'STUDENTS' || target === 'BOTH') ? 'block' : 'none';
+  instructorGroup.style.display = target === 'INSTRUCTORS' ? 'block' : 'none';
 }
 
 // ── CREATE SESSION ─────────────────────────────────────
@@ -64,27 +85,35 @@ async function createSession() {
 
   hideCreateAlerts();
 
-  if (!topic)    { showCreateAlert('error', 'Topic is required.'); return; }
-  if (!target)   { showCreateAlert('error', 'Please select an audience.'); return; }
+  if (!topic)  { showCreateAlert('error', 'Topic is required.'); return; }
+  if (!target) { showCreateAlert('error', 'Please select an audience.'); return; }
   if ((target === 'STUDENTS' || target === 'BOTH') && !batchId) {
-    showCreateAlert('error', 'Please select a batch for this audience type.'); return;
+    showCreateAlert('error', 'Please select a batch.'); return;
   }
   if (!dt)       { showCreateAlert('error', 'Please select a date and time.'); return; }
   if (!duration) { showCreateAlert('error', 'Please enter a duration.'); return; }
 
   const u = getUser();
-
   const body = {
     topic,
-    agenda:     agenda || null,
-    startTime:  dt,
-    duration:   parseInt(duration),
-    targetType: target,
+    agenda:      agenda || null,
+    startTime:   dt,
+    duration:    parseInt(duration),
+    targetType:  target,
     instituteId: u?.instituteId || 1
   };
 
   if (target === 'STUDENTS' || target === 'BOTH') {
     body.batchId = parseInt(batchId);
+  }
+
+  if (target === 'INSTRUCTORS') {
+    const selectedIds = [...document.querySelectorAll('input[name="instructor-pick"]:checked')]
+      .map(cb => parseInt(cb.value));
+    if (!selectedIds.length) {
+      showCreateAlert('error', 'Please select at least one instructor.'); return;
+    }
+    body.invitedUserIds = selectedIds;
   }
 
   setCreateLoading(true);
@@ -107,7 +136,10 @@ function clearCreateForm() {
   document.getElementById('session-datetime').value = '';
   document.getElementById('session-duration').value = '';
   document.getElementById('session-agenda').value   = '';
-  document.getElementById('batch-group').style.display = 'none';
+  document.getElementById('batch-group').style.display      = 'none';
+  document.getElementById('instructor-group').style.display = 'none';
+  document.querySelectorAll('input[name="instructor-pick"]')
+    .forEach(cb => cb.checked = false);
 }
 
 function setCreateLoading(loading) {

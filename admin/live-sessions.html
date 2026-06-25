@@ -15,9 +15,7 @@
 
   <header class="app-navbar">
     <div class="navbar-left">
-      <div class="hamburger" onclick="toggleSidebar()">
-        <span></span><span></span><span></span>
-      </div>
+      <div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
       <span class="navbar-title">Live Sessions</span>
     </div>
     <div class="navbar-right">
@@ -98,6 +96,12 @@
               <select class="form-select" id="session-batch">
                 <option value="">Select batch</option>
               </select>
+            </div>
+            <div class="form-group" id="instructor-group" style="display:none;grid-column:1/-1">
+              <label class="form-label">Select Instructors <span style="color:var(--error)">*</span></label>
+              <div id="instructor-list" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;border:1.5px solid var(--border);border-radius:8px;min-height:48px;background:var(--bg)">
+                <span style="color:var(--text-muted);font-size:13px">Loading instructors...</span>
+              </div>
             </div>
             <div class="form-group">
               <label class="form-label">Date & Time <span style="color:var(--error)">*</span></label>
