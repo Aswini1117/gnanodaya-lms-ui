@@ -1,4 +1,4 @@
-const BASE_URL = 'https://gnanodaya-lms-backend-production.up.railway.app';
+const BASE_URL = 'https://gnanodaya-lms-backend-production.up.railway.app/api';
 
 function authHeaders() {
   const token = localStorage.getItem('lms_token');
